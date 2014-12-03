@@ -171,6 +171,8 @@ class Leader {
   float branch;
   float fidir;
   float speed;
+  PVector[] points;
+  int spot;
   
   Leader(PVector pos_, float dir_, float fidir_, float size_, float curl_, float branch_, float speed_){
   
@@ -183,6 +185,10 @@ class Leader {
     branch = branch_;
     fidir = fidir_;
     speed = speed_;
+    points = new PVector[2];
+    points[0] = new PVector(pos.x, pos.y + size / 2);
+    points[1] = new PVector(pos.x, pos.y - size / 2);
+    spot = 0;
     
   }
   
@@ -232,8 +238,8 @@ class Leader {
       }
       checkdir = min(2 * PI - .01, checkdir);
       
-      pos.y += sins[floor(checkdir * NUMTRIGS / (2 * PI))];
-      pos.x += coss[floor(checkdir * NUMTRIGS / (2 * PI))];
+      PVector progression = new PVector(coss[floor(checkdir * NUMTRIGS / (2 * PI))], sins[floor(checkdir * NUMTRIGS / (2 * PI))]);
+      pos.add(progression);
       
       Boolean side = (abs(fidir) < PI / 2);
 
@@ -242,8 +248,19 @@ class Leader {
         return false;
       }
       
+      PVector perp = PVector.mult(new PVector(-progression.y, progression.x), size / 2);
+      PVector[] sides = new PVector[2];
+      sides[0] = PVector.add(pos, perp);
+      sides[1] = PVector.add(pos, PVector.mult(perp, -1));
+      
       hold.fill(side ? 255 : 0);
-      hold.ellipse(pos.x, pos.y, size, size);       
+      for(int j = 0; j < 2; j++){
+        hold.triangle(points[spot].x, points[spot].y, points[(spot + 1) % 2].x, points[(spot + 1) % 2].y, sides[j].x, sides[j].y);
+        points[spot] = sides[j];
+        spot = (spot + 1) % 2;
+      }
+
+      //hold.ellipse(pos.x, pos.y, size, size);       
       
       if(charge * size / abs(target - dir) > random(1000000 / (1 + branch * 30))){
         float newdir = dir + (random(1) > .5 ? 1 : -1) * (randomGaussian() + PI / 3);
@@ -278,6 +295,7 @@ void websocket(){
             cstate = !cstate;
           }
           c = (data.getFloat("c") == 1 ? true : false);
+          e = data.getFloat("e");
           f = data.getFloat("f");
           
           println(a.x + " " + a.y + " " + b.x + " " + b.y + " " + c + " " + d + " " + e + " " + f);
