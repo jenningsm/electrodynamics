@@ -71,7 +71,7 @@ void setup(){
   f = .5;
   cstate = true;
  
-  //websocket();
+  websocket();
   
   size(SIZE_X, SIZE_Y);
   l = new ArrayList<Leader>();
