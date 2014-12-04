@@ -18,8 +18,7 @@ float[] sins;
 final int NUMRANDS = 1000;
 final int NUMTRIGS = 512;
 
-Boolean recording;
-int recCount;
+float opacity;
 
 PVector a;
 PVector b;
@@ -58,11 +57,8 @@ void setup(){
     sins[i] = sin(2 * PI * i / NUMTRIGS);
   }
   
-  recording = false;
-  recCount = 0;
-  
-  hold = createGraphics(SIZE_X, SIZE_Y);
-  hold.noStroke();
+  //hold = createGraphics(SIZE_X, SIZE_Y);
+  //hold.noStroke();
   noStroke();
   
   count = 0;
@@ -70,12 +66,12 @@ void setup(){
   a = new PVector(.5, .5);
   b = new PVector(.5, .5);
   c = true;
-  d = .1;
+  d = random(.75);
   e = .5;
   f = .5;
   cstate = true;
  
-  websocket();
+  //websocket();
   
   size(SIZE_X, SIZE_Y);
   l = new ArrayList<Leader>();
@@ -85,7 +81,7 @@ void setup(){
 }
 
 void draw(){
-  hold.beginDraw();
+  //hold.beginDraw();
   for(int i = 0; i < l.size(); i++){
     if(!l.get(i).step()){
       l.remove(i);
@@ -97,46 +93,24 @@ void draw(){
   if(leaderDown){
     count++;
   }
-  hold.endDraw();
-  image(hold, 0, 0);
-  float opacity = max(0, (count - 0 * 2 * SIZE_X * frameRate / (1300 * curSpeed)) * curSpeed * .23);
+
+  opacity = max(0, count * curSpeed * .009);
   back(true, opacity);
   
  // back(false, max(64 - count , 0));
   
-  if(opacity > 350){
+  if(opacity > 18){
     l.clear();
     restart();
   }
   
-  if(recording){
-    
-    String save = "frames/lightning-";
-    int hold = recCount;
-    if(hold == 0)
-      hold = 1;
-    while(hold < 1000){
-      save += "0";
-      hold *= 10;
-    }
-    
-    save += recCount;
-    save += ".png";
-    
-    saveFrame(save);
-    
- //   saveFrame("frames/lightning-####.png");
-    
-    recCount++;
-  }
-  
 }
 
-void back(Boolean dir, float opacity){
+void back(Boolean dir, float op){
   
-  fill((dir ? 0 : 255), opacity);
+  fill((dir ? 0 : 255), op);
   rect(0, 0, SIZE_X / 2, SIZE_Y);
-  fill((dir ? 255 : 0), opacity);
+  fill((dir ? 255 : 0), op);
   rect(SIZE_X / 2, 0, SIZE_X / 2, SIZE_Y);
   
 }
@@ -145,16 +119,17 @@ void back(Boolean dir, float opacity){
 void restart(){
   leaderDown = false;
   count = 0;
-  hold.beginDraw();
-  hold.background(0);
-  hold.fill(255);
-  hold.noStroke();
-  hold.rect(SIZE_X / 2, 0, SIZE_X / 2, SIZE_Y);  
-  hold.endDraw();
+  
+  background(0);
+  fill(255);
+  noStroke();
+  rect(SIZE_X / 2, 0, SIZE_X / 2, SIZE_Y);
+  fill(0);
+  rect(0,0,SIZE_X / 2, SIZE_Y);
 
   float ang = atan2(SIZE_Y / 2, SIZE_X / 2) * d * (cstate ? 1 : -1);
   float speed = d * 30 + 5;
-  speed *= SIZE_X / 1300.0;
+  speed *= .5 * SIZE_X / 1300.0;
   l.add(new Leader(new PVector( 0, (SIZE_X / 2) * sin(ang) + SIZE_Y / 2, 0), -ang, -ang, .8 + 1.2 * a.x, e, b.x * .5, speed));
   l.add(new Leader(new PVector( SIZE_X, -(SIZE_X / 2) * sin(ang) + SIZE_Y / 2, 0), PI - ang, PI - ang, .8 + 1.2 * a.y, f, b.y * .5, speed));
   curSpeed = speed;
@@ -253,9 +228,9 @@ class Leader {
       sides[0] = PVector.add(pos, perp);
       sides[1] = PVector.add(pos, PVector.mult(perp, -1));
       
-      hold.fill(side ? 255 : 0);
+      fill(side ? 255 : 0, max(0, 255 - opacity));
       for(int j = 0; j < 2; j++){
-        hold.triangle(points[spot].x, points[spot].y, points[(spot + 1) % 2].x, points[(spot + 1) % 2].y, sides[j].x, sides[j].y);
+        triangle(points[spot].x, points[spot].y, points[(spot + 1) % 2].x, points[(spot + 1) % 2].y, sides[j].x, sides[j].y);
         points[spot] = sides[j];
         spot = (spot + 1) % 2;
       }
