@@ -61,7 +61,7 @@ void setup(){
   //hold.noStroke();
   noStroke();
   
-  count = 0;
+  count = 0;  
   
   a = new PVector(.5, .5);
   b = new PVector(.5, .5);
@@ -150,6 +150,9 @@ class Leader {
   PVector[] points;
   int spot;
   
+  float branchCount;
+  int lastBranch;
+  
   Leader(PVector pos_, float dir_, float fidir_, float size_, float curl_, float branch_, float speed_){
   
     pos =   pos_;
@@ -166,6 +169,9 @@ class Leader {
     points[1] = new PVector(pos.x, pos.y - size / 2);
     spot = 0;
     
+    branchCount = 0;
+    lastBranch = 0;
+    
   }
   
   float angBetween(float a, float b){
@@ -180,6 +186,8 @@ class Leader {
   }
   
   Boolean step(){
+    
+    noCursor();
     
     if(size < .1){
       return false;
@@ -236,16 +244,19 @@ class Leader {
         spot = (spot + 1) % 2;
       }
 
-      //hold.ellipse(pos.x, pos.y, size, size);       
-      
-      if(charge * size / abs(target - dir) > random(1000000 / (1 + branch * 30))){
-        float newdir = dir + (random(1) > .5 ? 1 : -1) * (randomGaussian() + PI / 3);
-        float newSize = .67 * size;
-        if(newSize > .1)
-          l.add(new Leader(pos.get(), newdir, fidir, newSize, curl, branch, speed));
-        charge = 0;
-      } else {
-        charge ++;
+      //hold.ellipse(pos.x, pos.y, size, size);    
+      branchCount += 1440.0f / (float) SIZE_X;   
+      if(branchCount > lastBranch){
+        lastBranch++;
+        if(charge * size / abs(target - dir) > random(1000000 / (1 + branch * 30))){
+          float newdir = dir + (random(1) > .5 ? 1 : -1) * (randomGaussian() + PI / 3);
+          float newSize = .67 * size;
+          if(newSize > .1)
+            l.add(new Leader(pos.get(), newdir, fidir, newSize, curl, branch, speed));
+          charge = 0;
+        } else {
+          charge ++;
+        }
       }
     }
     
