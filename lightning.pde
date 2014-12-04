@@ -94,12 +94,14 @@ void draw(){
     count++;
   }
 
-  opacity = count * curSpeed * .009;
-  back(true, opacity);
+  opacity = count * curSpeed * .01;
+  if(opacity > 0){
+    back(true, 4 + opacity * opacity * .15);
+  }
   
  // back(false, max(64 - count , 0));
   
-  if(opacity > 18){
+  if(opacity > 20){
     l.clear();
     restart();
   }
@@ -107,7 +109,6 @@ void draw(){
 }
 
 void back(Boolean dir, float op){
-  
   fill((dir ? 0 : 255), op);
   rect(0, 0, SIZE_X / 2, SIZE_Y);
   fill((dir ? 255 : 0), op);
@@ -129,7 +130,7 @@ void restart(){
 
   float ang = atan2(SIZE_Y / 2, SIZE_X / 2) * d * (cstate ? 1 : -1);
   float speed = d * 30 + 5;
-  speed *= .5 * SIZE_X / 1300.0;
+  speed *= .7 * SIZE_X / 1300.0;
   l.add(new Leader(new PVector( 0, (SIZE_X / 2) * sin(ang) + SIZE_Y / 2, 0), -ang, -ang, .8 + 1.2 * a.x, e, b.x * .5, speed));
   l.add(new Leader(new PVector( SIZE_X, -(SIZE_X / 2) * sin(ang) + SIZE_Y / 2, 0), PI - ang, PI - ang, .8 + 1.2 * a.y, f, b.y * .5, speed));
   curSpeed = speed;
